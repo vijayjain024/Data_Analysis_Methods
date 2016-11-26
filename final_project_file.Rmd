@@ -1,68 +1,20 @@
 ---
-title: "Final_project"
 author: "Group2"
 date: "November 26, 2016"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,fig.width = 10,fig.height = 12,message = FALSE)
-```
-
-##Libraries used
-```{r results='hide'}
-library(corrplot)
-library(rbokeh)
-library(dplyr)
 ```
 
 
-##Load the dataset
-```{r house}
-house<- read.csv("kc_house_data.csv")
-names(house)
+```
+
+
 
 ```
 
-##Changing datatypes for categorical variables
 ```{r}
-```
 
-##Data Exploration
-```{r}
-summary(house)
-str(house)
-head(house)
-```
-
-
-## Visualization
-
-```{r echo=FALSE}
-housecor <- cor(house[c(3:18)])
-corrplot(housecor, method = "number")
-```
-
-##Modifying the the dataset
-```{r}
-house_modi=house[c(3:18)]
-house_modi$bedbath <- house_modi$bathrooms/house_modi$bedrooms
-house_modi$sqft_living_log <- log10(house_modi$sqft_living)
-house_modi$bedbath_log <- log10(house_modi$bedbath)
-house_modi$renov_index <- ifelse(house_modi$yr_renovated != 0, 2016 - house_modi$yr_renovated, 2016 - house_modi$yr_built)
-house_modi$total_sqft <- house_modi$sqft_living + house_modi$sqft_lot
-house_modi$total_sqft_log <- log10(house_modi$total_sqft)
-house_modi$price_per_sqft_living <- (house_modi$price/house_modi$sqft_living)
-```
-
-##Generate heatmap
-```{r echo=FALSE}
-price_per_sqft_living_lat_long_map <- gmap(lat = mean(house$lat), lng = mean(house$long), 
-                                           zoom = 11,
-                                           width = 680, height = 600) %>%
-  ly_points(house$long, house$lat, data = house, 
-            color = house$price_per_sqft_living
-  )
-price_per_sqft_living_lat_long_map
 ```
 
