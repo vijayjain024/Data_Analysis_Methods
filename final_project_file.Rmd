@@ -1,5 +1,5 @@
 ---
-title: "Final"
+title: "Final Project"
 date: "November 26, 2016"
 output: html_document
 ---
@@ -68,11 +68,14 @@ house_modi$sqft_living15_log <- log10(house_modi$sqft_living15)
 
 ##Generate heatmap
 ```{r echo=FALSE}
-price_per_sqft_living_lat_long_map <- gmap(lat = mean(house$lat), lng = mean(house$long), 
-zoom = 11,
-width = 680, height = 600) %>%
-ly_points(house$long, house$lat, data = house, 
-color = house$price_per_sqft_living, alpha(1)
+hspricing <- read.csv("kc_house_data.csv", header = TRUE)
+hspricing$price_per_sqft_living <- (hspricing$price/hspricing$sqft_living)
+
+price_per_sqft_living_lat_long_map <- gmap(lat = mean(hspricing$lat), lng = mean(hspricing$long), 
+                                           zoom = 11,
+                                           width = 680, height = 600) %>%
+  ly_points(hspricing$long, hspricing$lat, data = hspricing, 
+            color = hspricing$price_per_sqft_living, alpha(1)
 )
 price_per_sqft_living_lat_long_map
 ```
