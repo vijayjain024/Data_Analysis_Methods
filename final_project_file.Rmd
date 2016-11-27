@@ -65,8 +65,7 @@ color = house$price_per_sqft_living
 price_per_sqft_living_lat_long_map
 ```
 
+##I dont want these
 
-
-##Make a linear regression
 
 
