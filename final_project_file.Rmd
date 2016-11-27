@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE,fig.width = 10,fig.height = 12,message = FALSE
 ##Libraries used
 ```{r results='hide'}
 library(corrplot)
+library(ggplot2)
+library(maps)
 library(rbokeh)
 library(dplyr)
 ```
@@ -25,6 +27,7 @@ names(house)
 
 ##Changing datatypes for categorical variables
 ```{r}
+
 ```
 
 ##Data Exploration
@@ -54,16 +57,25 @@ house_modi$total_sqft_log <- log10(house_modi$total_sqft)
 house_modi$price_per_sqft_living <- (house_modi$price/house_modi$sqft_living)
 ```
 
+##Changing datatypes for categorical variables
+```{r}
+house_modi$waterfront <- as.factor(house_modi$waterfront)
+house_modi$view <- as.factor(house_modi$view)
+house_modi$condition <- as.factor(house_modi$condition)
+house_modi$grade <- as.factor(house_modi$grade)
+```
+
 ##Generate heatmap
 ```{r echo=FALSE}
 price_per_sqft_living_lat_long_map <- gmap(lat = mean(house$lat), lng = mean(house$long), 
 zoom = 11,
 width = 680, height = 600) %>%
 ly_points(house$long, house$lat, data = house, 
-color = house$price_per_sqft_living
+color = house$price_per_sqft_living, alpha(1)
 )
 price_per_sqft_living_lat_long_map
 ```
+
 
 #Linear model
 ```{r}
