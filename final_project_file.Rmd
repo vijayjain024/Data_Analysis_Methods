@@ -65,7 +65,6 @@ color = house$price_per_sqft_living
 price_per_sqft_living_lat_long_map
 ```
 
-##Build a linear model
 
 
 
