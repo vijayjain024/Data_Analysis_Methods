@@ -67,5 +67,3 @@ price_per_sqft_living_lat_long_map
 
 ##I dont want these
 
-
-
