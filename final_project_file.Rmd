@@ -15,6 +15,7 @@ library(ggplot2)
 library(maps)
 library(rbokeh)
 library(dplyr)
+require("car")
 ```
 
 
@@ -91,7 +92,7 @@ house_sub<-house_sub[,-12]
 house_model1 <- lm(house_sub$price ~. , data = house_sub) ##original model excluding id,data, lat and long
 summary(house_model1)
 step <- stepAIC(house_model1, direction="both")
-require("car")    
+ 
 house_model <- lm(house_modi$price ~. , data = house_modi)
 summary(house_model)
 
