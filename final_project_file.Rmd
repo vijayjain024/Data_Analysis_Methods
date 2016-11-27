@@ -66,3 +66,5 @@ price_per_sqft_living_lat_long_map <- gmap(lat = mean(house$lat), lng = mean(hou
 price_per_sqft_living_lat_long_map
 ```
 
+
+##Make a linear regression
