@@ -69,4 +69,6 @@ price_per_sqft_living_lat_long_map
 
 ##Make a linear regression
 
+##Build a linear model 
+
 
