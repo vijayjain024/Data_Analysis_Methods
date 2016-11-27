@@ -57,13 +57,14 @@ house_modi$price_per_sqft_living <- (house_modi$price/house_modi$sqft_living)
 ##Generate heatmap
 ```{r echo=FALSE}
 price_per_sqft_living_lat_long_map <- gmap(lat = mean(house$lat), lng = mean(house$long), 
-                                           zoom = 11,
-                                           width = 680, height = 600) %>%
-  ly_points(house$long, house$lat, data = house, 
-            color = house$price_per_sqft_living
-  )
+zoom = 11,
+width = 680, height = 600) %>%
+ly_points(house$long, house$lat, data = house, 
+color = house$price_per_sqft_living
+)
 price_per_sqft_living_lat_long_map
 ```
+
 
 
 ##Make a linear regression
