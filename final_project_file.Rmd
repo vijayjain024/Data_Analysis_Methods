@@ -25,16 +25,20 @@ names(house)
 
 ```
 
-##Changing datatypes for categorical variables
-```{r}
-
-```
-
 ##Data Exploration
 ```{r}
 summary(house)
 str(house)
 head(house)
+```
+
+##Changing datatypes for categorical variables
+```{r}
+house$waterfront <- as.factor(house$waterfront)
+house$view <- as.factor(house$view)
+house$condition <- as.factor(house$condition)
+house$grade <- as.factor(house$grade)
+house$zipcode <- as.factor(house$zipcode)
 ```
 
 
@@ -47,23 +51,20 @@ corrplot(housecor, method = "number")
 
 ##Modifying the the dataset
 ```{r}
-house_modi=house[c(3:18)]
+house_modi=house[c(3:21)]
 house_modi$bedbath <- house_modi$bathrooms/house_modi$bedrooms
+house_modi$bedbath <- replace(house_modi$bedbath, !is.finite(house_modi$bedbath),0)
 house_modi$sqft_living_log <- log10(house_modi$sqft_living)
 house_modi$bedbath_log <- log10(house_modi$bedbath)
+house_modi$bedbath_log <- replace(house_modi$bedbath_log, !is.finite(house_modi$bedbath_log),0)
 house_modi$renov_index <- ifelse(house_modi$yr_renovated != 0, 2016 - house_modi$yr_renovated, 2016 - house_modi$yr_built)
 house_modi$total_sqft <- house_modi$sqft_living + house_modi$sqft_lot
 house_modi$total_sqft_log <- log10(house_modi$total_sqft)
 house_modi$price_per_sqft_living <- (house_modi$price/house_modi$sqft_living)
-```
+house_modi$sqft_living15_log <- log10(house_modi$sqft_living15)
 
-##Changing datatypes for categorical variables
-```{r}
-house_modi$waterfront <- as.factor(house_modi$waterfront)
-house_modi$view <- as.factor(house_modi$view)
-house_modi$condition <- as.factor(house_modi$condition)
-house_modi$grade <- as.factor(house_modi$grade)
 ```
+`
 
 ##Generate heatmap
 ```{r echo=FALSE}
@@ -77,8 +78,19 @@ price_per_sqft_living_lat_long_map
 ```
 
 
+
 #Linear model
 ```{r}
+house_sub <- house[,c(3:17,20,21)]
+names(house_sub)
+house_sub$grade <- recode(house_sub$grade, "c('1','3','4','5','6','7','8','9','10')='0'; else='1'")
+house_sub<-house_sub[,-12] 
+house_model1 <- lm(house_sub$price ~. , data = house_sub) ##original model excluding id,data, lat and long
+summary(house_model1)
+step <- stepAIC(house_model1, direction="both")
+require("car")    
+house_model <- lm(house_modi$price ~. , data = house_modi)
+summary(house_model)
 
 ```
 
