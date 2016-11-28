@@ -100,4 +100,5 @@ house_model <- lm(house_modi$price ~. , data = house_modi)
 summary(house_model)
 ##new model with R-squared 1
 house_model_reduced<-lm(house_modi$price ~ house_modi$bedrooms+house_modi$bathrooms+house_modi$sqft_living+house_modi$sqft_lot+house_modi$waterfront+house_modi$view+house_modi$grade+house_modi$zipcode+house_modi$sqft_living15+house_modi$sqft_lot15+house_modi$renov_index+house_modi$total_sqft_log+house_modi$price_per_sqft_living,data = house_modi)
+summary(house_model_reduced)
 ```
