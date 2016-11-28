@@ -15,11 +15,7 @@ library(ggplot2)
 library(maps)
 library(rbokeh)
 library(dplyr)
-require("car")
-library(leaps)
-library(MASS)
 ```
-
 
 ##Load the dataset
 ```{r house}
@@ -35,14 +31,6 @@ str(house)
 head(house)
 ```
 
-## Visualization
-
-```{r echo=FALSE}
-housecor <- cor(house[c(3:18)])
-corrplot(housecor, method = "number")
-```
-
-
 ##Changing datatypes for categorical variables
 ```{r}
 house$waterfront <- as.factor(house$waterfront)
@@ -50,13 +38,19 @@ house$view <- as.factor(house$view)
 house$condition <- as.factor(house$condition)
 house$grade <- as.factor(house$grade)
 house$zipcode <- as.factor(house$zipcode)
-house$grade <- recode(house$grade, "c('1','3','4','5','6','7','8','9','10')='0'; else='1'")
 ```
 
 
+## Visualization
+
+```{r echo=FALSE}
+housecor <- cor(house[c(3:18)])
+corrplot(housecor, method = "number")
+```
+
 ##Modifying the the dataset
 ```{r}
-house_modi=house[,c(3:17,20,21)]
+house_modi=house[c(3:21)]
 house_modi$bedbath <- house_modi$bathrooms/house_modi$bedrooms
 house_modi$bedbath <- replace(house_modi$bedbath, !is.finite(house_modi$bedbath),0)
 house_modi$sqft_living_log <- log10(house_modi$sqft_living)
@@ -91,14 +85,16 @@ price_per_sqft_living_lat_long_map
 ```{r}
 house_sub <- house[,c(3:17,20,21)]
 names(house_sub)
-house_sub<-house_sub[,-12]
+house_sub$grade <- recode(house_sub$grade, "c('1','3','4','5','6','7','8','9','10')='0'; else='1'")
+house_sub<-house_sub[,-12] 
 house_model1 <- lm(house_sub$price ~. , data = house_sub) ##original model excluding id,data, lat and long
 summary(house_model1)
 step <- stepAIC(house_model1, direction="both")
-house_modi<-house_modi[,-22]
+require("car")    
 house_model <- lm(house_modi$price ~. , data = house_modi)
 summary(house_model)
-##new model with R-squared 1
-house_model_reduced<-lm(house_modi$price ~ house_modi$bedrooms+house_modi$bathrooms+house_modi$sqft_living+house_modi$sqft_lot+house_modi$waterfront+house_modi$view+house_modi$grade+house_modi$zipcode+house_modi$sqft_living15+house_modi$sqft_lot15+house_modi$renov_index+house_modi$total_sqft_log+house_modi$price_per_sqft_living,data = house_modi)
-summary(house_model_reduced)
+
 ```
+
+
+
