@@ -15,6 +15,9 @@ library(ggplot2)
 library(maps)
 library(rbokeh)
 library(dplyr)
+library(MASS)
+library(leaps)
+require("car")
 ```
 
 ##Load the dataset
@@ -31,6 +34,15 @@ str(house)
 head(house)
 ```
 
+
+## Visualization
+
+```{r echo=FALSE}
+housecor <- cor(house[c(3:18)])
+corrplot(housecor, method = "number")
+```
+
+
 ##Changing datatypes for categorical variables
 ```{r}
 house$waterfront <- as.factor(house$waterfront)
@@ -41,12 +53,6 @@ house$zipcode <- as.factor(house$zipcode)
 ```
 
 
-## Visualization
-
-```{r echo=FALSE}
-housecor <- cor(house[c(3:18)])
-corrplot(housecor, method = "number")
-```
 
 ##Modifying the the dataset
 ```{r}
@@ -93,8 +99,60 @@ step <- stepAIC(house_model1, direction="both")
 require("car")    
 house_model <- lm(house_modi$price ~. , data = house_modi)
 summary(house_model)
+```
+
+
+##new model with R-squared 1
+```{r}
+house_model_reduced<-lm(house_modi$price ~ house_modi$bedrooms+house_modi$bathrooms+house_modi$sqft_living+house_modi$sqft_lot+house_modi$waterfront+house_modi$view+house_modi$grade+house_modi$zipcode+house_modi$sqft_living15+house_modi$sqft_lot15+house_modi$renov_index+house_modi$total_sqft_log+house_modi$price_per_sqft_living,data = house_modi)
+summary(house_model_reduced)
+vif(house_model_reduced)
+plot(house_model_reduced$fitted.values,house_model_reduced$residuals)
+abline(h=0, col="grey", lwd=3)
+```
+
+
+#New Model
+I think this new model can be used for further analysis. I have not made any significant transformations and from the residual plot you can see that it is a good fit. Let me know what you think about it
+```{r new model}
+
+house_modi_2=house[,c(3:17,20,21)]
+house_modi_2_model<-lm(house_modi_2$price~.,data=house_modi_2)
+summary(house_modi_2_model)
+names(house_modi_2)
+names(house)
+```
+
+#after transformation
+I have applied the sqrt transformation to the response variable instead of applying the transformation to the covariates.
+
+```{r transformed}
+house_modi_2$price<-sqrt(house_modi_2$price)
+
+plot(house_modi_2_model$fitted.values,house_modi_2_model$residuals)
+abline(h=0,col="grey",lwd=3)
+```
+
+#New subset
+I have now created the new subset that we can use to analyse. The variables that i have removed can be seen in the r code written below.
+
+The variables sqft_basement, sqft_living15, sqft_lot15 are insignificant. The other variables are taking down the adjusted R-squared marginally but intuitively the values of those variables are not that significant to determining the prices of the house.
+
+```{r subset}
+house_modi_3<-subset(house_modi_2,select=-c(sqft_above,sqft_basement,yr_renovated,sqft_living15,sqft_lot15,view,waterfront))
+house_modi_3_model<-lm(house_modi_3$price~.,data=house_modi_3)
+summary(house_modi_3_model)
+names(house_modi_3)
+plot(house_modi_3_model$fitted.values,house_modi_3_model$residuals)
+abline(h=0,col="grey",lwd=3)
+
 
 ```
+
+Just check the residual plots for the three models that have been created. THe model that sahil created, although it has a better r-square value, the residual plot has a pattern. The 2 models that I have created have comparatively a smaller r-squared but the residual plot is much better. Also, the data set that sahil has used to create his model has almost 25 variables. The 2 models that i have created have 17 and 10 variables respectively. Lets decide on a model and proceed further.
+
+
+
 
 
 
