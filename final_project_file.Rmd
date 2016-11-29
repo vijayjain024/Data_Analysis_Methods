@@ -127,10 +127,11 @@ names(house)
 I have applied the sqrt transformation to the response variable instead of applying the transformation to the covariates.
 
 ```{r transformed}
-house_modi_2$price<-sqrt(house_modi_2$price)
-
 plot(house_modi_2_model$fitted.values,house_modi_2_model$residuals)
 abline(h=0,col="grey",lwd=3)
+
+house_modi_2$price<-sqrt(house_modi_2$price)
+
 ```
 
 #New subset
@@ -139,12 +140,22 @@ I have now created the new subset that we can use to analyse. The variables that
 The variables sqft_basement, sqft_living15, sqft_lot15 are insignificant. The other variables are taking down the adjusted R-squared marginally but intuitively the values of those variables are not that significant to determining the prices of the house.
 
 ```{r subset}
-house_modi_3<-subset(house_modi_2,select=-c(sqft_above,sqft_basement,yr_renovated,sqft_living15,sqft_lot15,view,waterfront))
+house_modi_3<-subset(house_modi_2,select=-c(floors,sqft_above,sqft_basement,yr_renovated,sqft_living15,sqft_lot15,view,waterfront))
+house_modi_3$bedbath <- house_modi_3$bathrooms/house_modi_3$bedrooms
+house_modi_3$bedbath <- replace(house_modi_3$bedbath, !is.finite(house_modi_3$bedbath),0)
+house_modi_3<-subset(house_modi_3,select=-c(bedrooms, bathrooms))
+
 house_modi_3_model<-lm(house_modi_3$price~.,data=house_modi_3)
 summary(house_modi_3_model)
 names(house_modi_3)
+
 plot(house_modi_3_model$fitted.values,house_modi_3_model$residuals)
 abline(h=0,col="grey",lwd=3)
+
+vif(house_modi_3_model)
+
+par(mfrow=c(2,2))
+plot(house_modi_3_model)
 
 
 ```
