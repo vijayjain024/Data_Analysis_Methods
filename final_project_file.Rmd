@@ -19,6 +19,12 @@ library(MASS)
 library(leaps)
 library(HH)
 require("car")
+library(plyr)
+library(reshape2)
+library(plotrix)
+library(ggmap)
+require("car")
+
 ```
 
 ##Load the dataset
