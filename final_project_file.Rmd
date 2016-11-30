@@ -17,6 +17,7 @@ library(rbokeh)
 library(dplyr)
 library(MASS)
 library(leaps)
+library(HH)
 require("car")
 ```
 
@@ -29,7 +30,7 @@ names(house)
 
 ##Data Exploration
 ```{r}
-summary(house)
+#summary(house)
 str(house)
 head(house)
 ```
@@ -42,7 +43,35 @@ housecor <- cor(house[c(3:18)])
 corrplot(housecor, method = "number")
 ```
 
+The correlation plot helps us to understand which variables in the data set are correlated to the response variable that we are considering, i.e - price. 
 
+##Generate heatmap
+```{r echo=FALSE}
+hspricing <- read.csv("kc_house_data.csv", header = TRUE)
+hspricing$price_per_sqft_living <- (hspricing$price/hspricing$sqft_living)
+
+price_per_sqft_living_lat_long_map <- gmap(lat = mean(hspricing$lat), lng = mean(hspricing$long), 
+                                           zoom = 11,
+                                           width = 680, height = 600) %>%
+  ly_points(hspricing$long, hspricing$lat, data = hspricing, 
+            color = hspricing$price_per_sqft_living, alpha(1)
+)
+price_per_sqft_living_lat_long_map
+```
+
+After generating the heat map, we can see through the zip codes, the areas in which the prices are high and the areas where the prices are low.
+
+
+#Creating an initial model for the dataset, using all the variables.
+```{r}
+house_model<-lm(house$price~.,data=house)
+summary(house_model)$r.square
+```
+
+We can see that the model has a very small value for R2, suggesting that there are alterations needed to be made to the covariates to be used in the model
+
+
+##We can alter the variables to convert them to catergorical types as follows
 ##Changing datatypes for categorical variables
 ```{r}
 house$waterfront <- as.factor(house$waterfront)
@@ -59,111 +88,118 @@ house$zipcode <- as.factor(house$zipcode)
 house_modi=house[c(3:21)]
 house_modi$bedbath <- house_modi$bathrooms/house_modi$bedrooms
 house_modi$bedbath <- replace(house_modi$bedbath, !is.finite(house_modi$bedbath),0)
-house_modi$sqft_living_log <- log10(house_modi$sqft_living)
-house_modi$bedbath_log <- log10(house_modi$bedbath)
-house_modi$bedbath_log <- replace(house_modi$bedbath_log, !is.finite(house_modi$bedbath_log),0)
 house_modi$renov_index <- ifelse(house_modi$yr_renovated != 0, 2016 - house_modi$yr_renovated, 2016 - house_modi$yr_built)
-house_modi$total_sqft <- house_modi$sqft_living + house_modi$sqft_lot
-house_modi$total_sqft_log <- log10(house_modi$total_sqft)
-house_modi$price_per_sqft_living <- (house_modi$price/house_modi$sqft_living)
-house_modi$sqft_living15_log <- log10(house_modi$sqft_living15)
-
+house_modi<-subset(house_modi,select=-c(lat,long))
+names(house_modi)
 ```
-`
-
-##Generate heatmap
-```{r echo=FALSE}
-hspricing <- read.csv("kc_house_data.csv", header = TRUE)
-hspricing$price_per_sqft_living <- (hspricing$price/hspricing$sqft_living)
-
-price_per_sqft_living_lat_long_map <- gmap(lat = mean(hspricing$lat), lng = mean(hspricing$long), 
-                                           zoom = 11,
-                                           width = 680, height = 600) %>%
-  ly_points(hspricing$long, hspricing$lat, data = hspricing, 
-            color = hspricing$price_per_sqft_living, alpha(1)
-)
-price_per_sqft_living_lat_long_map
-```
-
-
 
 #Linear model
 ```{r}
 house_sub <- house[,c(3:17,20,21)]
 names(house_sub)
 house_sub$grade <- recode(house_sub$grade, "c('1','3','4','5','6','7','8','9','10')='0'; else='1'")
-house_sub<-house_sub[,-12] 
 house_model1 <- lm(house_sub$price ~. , data = house_sub) ##original model excluding id,data, lat and long
-summary(house_model1)
+summary(house_model1)$r.square
 step <- stepAIC(house_model1, direction="both")
-require("car")    
+   
 house_model <- lm(house_modi$price ~. , data = house_modi)
-summary(house_model)
+summary(house_model)$r.square
+plot(house_model$fitted.values, house_model$residuals)
+abline(h=0, col="grey",lwd=3)
 ```
 
+We can see from the model created in the above step that even though the r-squared is pretty high, the residual plot has a certain pattern and hence we cannot go ahead with the model that we have created in the step above.
 
-##new model with R-squared 1
+#Understanding and Creating a new model
+
+While creating this model, we have not considered some of the variables like waterfront, view, condition and lat and lang, since the values for them are not varying much and since the values for them in the dataset are almost constant.
+Also, sqft_living15 and sqft_lot15 have a correlation with sqft_living and sqft_lot, and hence we are not considering those two variables either in the process to finalise the final model.
+
 ```{r}
-house_model_reduced<-lm(house_modi$price ~ house_modi$bedrooms+house_modi$bathrooms+house_modi$sqft_living+house_modi$sqft_lot+house_modi$waterfront+house_modi$view+house_modi$grade+house_modi$zipcode+house_modi$sqft_living15+house_modi$sqft_lot15+house_modi$renov_index+house_modi$total_sqft_log+house_modi$price_per_sqft_living,data = house_modi)
-summary(house_model_reduced)
-vif(house_model_reduced)
-plot(house_model_reduced$fitted.values,house_model_reduced$residuals)
+house_modi1 <- lm(house_modi$price ~ house_modi$bedbath + house_modi$sqft_living + house_modi$zipcode + house_modi$yr_built + house_modi$floors, data = house_modi)
+summary(house_modi1)$r.square
+plot(house_modi1$fitted.values,house_modi1$residuals)
+abline(h=0, col="grey",lwd=3)
+```
+
+Even for this model, we can see that the residual plot has a pattern and as such we need to either select different variables or perform transformations on the dataaset.
+By further analysing the dataset, we have reduced the number of covariates to those mentioned above. However, 
+e can see here that when we reduce the number of variables, the value of r-square has reduced considerably, which means that we need to perform a transformation on either the response variable or the covariate(s).
+Transforming the X variable does little to change distribution of the data about the (possibly nonlinear) regression line. 
+Transforming the Y variable not only changes the shape of regression line, but it alters the relative vertical spacing of the observations. Therefore, it has been suggested that the Y variable be transformed first to achieve constant variance around a possibly non-linear regression curve and then the X variable be transformed to make things linear. 
+
+#Performing a log transformation on the response variable in the above model.
+```{r}
+house_modi2 <- lm(log10(house_modi$price) ~ house_modi$bedbath + house_modi$sqft_living + house_modi$zipcode + house_modi$yr_built + house_modi$floors, data = house_modi)
+summary(house_modi2)$r.square
+plot(house_modi2$fitted.values,house_modi2$residuals)
 abline(h=0, col="grey", lwd=3)
+
 ```
 
+Here, we can see that the r-square value is equal to the value that we considered earlier with all the variables, but even the residual plot is more dispersed and there is no definite pattern to it. 
+We can further analyse whether we can remove any other variables, by checking the values of adjusted r-square.
+The adjusted R-squared compares the explanatory power of regression models that contain different numbers of predictors.
+The adjusted R-squared is a modified version of R-squared that has been adjusted for the number of predictors in the model. The adjusted R-squared increases only if the new term improves the model more than would be expected by chance. It decreases when a predictor improves the model by less than expected by chance. The adjusted R-squared can be negative, but it’s usually not. It is always lower than the R-squared.
 
-#New Model
-I think this new model can be used for further analysis. I have not made any significant transformations and from the residual plot you can see that it is a good fit. Let me know what you think about it
-```{r new model}
 
-house_modi_2=house[,c(3:17,20,21)]
-house_modi_2_model<-lm(house_modi_2$price~.,data=house_modi_2)
-summary(house_modi_2_model)
-names(house_modi_2)
-names(house)
-```
+#Finalising a model
+```{r}
+house_modi3<-lm(log10(house_modi$price) ~ house_modi$bedbath + house_modi$sqft_living + house_modi$zipcode + house_modi$renov_index, data=house_modi)
+summary(house_modi3)$r.square
+summary(house_modi3)$adj
+plot(house_modi3$fitted.values,house_modi3$residuals)
+abline(h=0, col="grey", lwd=3)
 
-#after transformation
-I have applied the sqrt transformation to the response variable instead of applying the transformation to the covariates.
 
-```{r transformed}
-plot(house_modi_2_model$fitted.values,house_modi_2_model$residuals)
+house_modi4<-lm(log10(house_modi$price) ~ house_modi$bedbath + house_modi$sqft_living + house_modi$zipcode, data=house_modi)
+summary(house_modi4)$r.square
+summary(house_modi4)$adj
+plot(house_modi4$fitted.values,house_modi4$residuals)
 abline(h=0,col="grey",lwd=3)
 
-house_modi_2$price<-sqrt(house_modi_2$price)
+anova(house_modi4, house_modi3)
 
 ```
 
-#New subset
-I have now created the new subset that we can use to analyse. The variables that i have removed can be seen in the r code written below.
+From the above residual plots, r-square and adjusted r-square values and also the anova test, we can see that the variables majorly affecting the prices in our given dataset are BedBath, Sqft_Living, Zip_Code
 
-The variables sqft_basement, sqft_living15, sqft_lot15 are insignificant. The other variables are taking down the adjusted R-squared marginally but intuitively the values of those variables are not that significant to determining the prices of the house.
-
-```{r subset}
-house_modi_3<-subset(house_modi_2,select=-c(floors,sqft_above,sqft_basement,yr_renovated,sqft_living15,sqft_lot15,view,waterfront))
-house_modi_3$bedbath <- house_modi_3$bathrooms/house_modi_3$bedrooms
-house_modi_3$bedbath <- replace(house_modi_3$bedbath, !is.finite(house_modi_3$bedbath),0)
-house_modi_3<-subset(house_modi_3,select=-c(bedrooms, bathrooms))
-
-house_modi_3_model<-lm(house_modi_3$price~.,data=house_modi_3)
-summary(house_modi_3_model)
-names(house_modi_3)
-
-plot(house_modi_3_model$fitted.values,house_modi_3_model$residuals)
-abline(h=0,col="grey",lwd=3)
-
-vif(house_modi_3_model)
-
+##We will apply the boxcox method to see if we have to perform any more transformation on the response variable in order to fit the model in an even better way.
+```{r}
+par(mfrow=c(1,1))
+boxcox(house_modi4)
+house_modi6<-lm((log10(house_modi$price)^1.3) ~ house_modi$bedbath + house_modi$sqft_living + house_modi$zipcode, data=house_modi)
+summary(house_modi6)$r.square
 par(mfrow=c(2,2))
-plot(house_modi_3_model)
+plot(house_modi6)
+```
 
+After using the boxcox function and plotting for the model, we can see that even though we do apply the power transformation, where in we are raising the response variable by a power of 1.3, there is no difference in the model that we have chosen, as a result we can go ahead and consider the model with the 3 covariates 'BedBat', 'sqft_living' and 'Renov_Index', which actually consists of 5 different variables, since bedbath and renov_index are single variables which have been combined using 4 separate variables from the given dataset.
+
+##The final model that we can consider is model 'house_modi4' as given above.
+
+```{r}
+par(mfrow=c(2,2))
+plot(house_modi4)
+
+```
+In the first graph we can see that the red line is not strongly curved line so the model looks linear.
+The second plot checks if residual has a normal distribution.
+The third plot is to check if variance is constant( that is to see if the standard deviation among the residuals appears to be constant). Here the variance looks about constant.
+
+##Checking multicollinearity among the regressor variables
+```{r}
+vif(house_modi4)
 
 ```
 
-Just check the residual plots for the three models that have been created. THe model that sahil created, although it has a better r-square value, the residual plot has a pattern. The 2 models that I have created have comparatively a smaller r-squared but the residual plot is much better. Also, the data set that sahil has used to create his model has almost 25 variables. The 2 models that i have created have 17 and 10 variables respectively. Lets decide on a model and proceed further.
+The above code shows us that there is no problem of multicollinearity among the regressor variables. That is, the regressor variables are not collinear among themselves.
 
+```{r}
+par(mfrow=c(2,1))
+hist(house_modi4$residuals)
+qqnorm(house_modi4$residuals)
+```
 
-
-
-
+The above plots show that the error term(residual) has a normal distribution.
 
