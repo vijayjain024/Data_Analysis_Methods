@@ -121,8 +121,13 @@ print(map.price4)
 ```
 
 As we can see, the prices near waterfront are higher so we people are paying a premium for a waterfront view.
-###Density plors
+###Density plots
 ```{r}
+
+house_plot<-read.csv("kc_house_data.csv")
+house_plot$price_in_mil<-house$price/1000000
+house_plot$price_sqft<-house$price/house$sqft_living
+house_plot$floors<-factor(house$floors)
 ggplot(house_plot, aes(x=price_in_mil))+ geom_density(aes(group=floors,colour=floors,fill=floors),alpha=.3)+labs(ggtitle("Density Plot of Price by Height"))+scale_x_continuous(name="Price in Millions")
 
 ggplot(house_plot, aes(x=price_sqft))+ geom_density(aes(group=floors,colour=floors,fill=floors),alpha=.3)+labs(ggtitle("Density Plot of Price per Sq. Ft. by Height"))+scale_x_continuous(name="Price by Square Foot")
