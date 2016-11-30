@@ -174,7 +174,17 @@ par(mfrow=c(2,2))
 plot(house_modi6)
 ```
 
-After using the boxcox function and plotting for the model, we can see that even though we do apply the power transformation, where in we are raising the response variable by a power of 1.3, there is no difference in the model that we have chosen, as a result we can go ahead and consider the model with the 3 covariates 'BedBat', 'sqft_living' and 'Renov_Index', which actually consists of 5 different variables, since bedbath and renov_index are single variables which have been combined using 4 separate variables from the given dataset.
+After using the boxcox function and plotting for the model, we can see that even though we do apply the power transformation, where in we are raising the response variable by a power of 1.3, there is no difference in the model that we have chosen, as a result we can go ahead and consider the model with the 3 covariates 'BedBath', 'sqft_living' and 'Renov_Index', which actually consists of 5 different variables, since bedbath and renov_index are single variables which have been combined using 4 separate variables from the given dataset.
+
+Now we will try to see how price by sqft_living changes with zipcode so taking interaction variable
+
+```{r}
+house_modi_test<-lm(log10(price) ~ bedbath + sqft_living + zipcode++zipcode:sqft_living, data=house_modi)
+anova(house_modi4,house_modi_test)
+summary(house_modi_test)$adj.r.squared
+```
+
+As we can see the r squared has not changed much after adding interaction variable so we decide to keep our model as is.
 
 ##The final model that we can consider is model 'house_modi4' as given above.
 
