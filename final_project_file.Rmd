@@ -88,13 +88,41 @@ price_per_sqft_living_lat_long_map <- gmap(lat = mean(hspricing$lat), lng = mean
 price_per_sqft_living_lat_long_map
 ```
 
-<<<<<<< HEAD
-=======
 
 After generating the heat map, we can see through the zip codes, the areas in which the prices are high and the areas where the prices are low.
 
 
->>>>>>> d8f3f1640c96cdcf0ec74305c26324b219030c92
+##Generate another heatmap
+```{r echo=FALSE}
+hspricing <- read.csv("kc_house_data.csv")
+hspricing$price_per_sqft_living <- (hspricing$price/hspricing$sqft_living)
+
+longitude<-hspricing$long
+latitude<-hspricing$lat
+price<-hspricing$price_per_sqft_living
+
+basemap<-get_map(location=c(mean(longitude),mean(latitude)), zoom=8, maptype = 'watercolor',source="stamen")
+
+map1<-ggmap(basemap,base_layer=ggplot(hspricing,aes(x=long,y=lat,color=price_per_sqft_living)))+geom_point(alpha=.1)
+
+map.price<-map1+scale_color_gradient(low="blue",high="red")
+map.price2<-map.price+scale_x_continuous(limits=c(min(longitude),max(longitude)))+scale_y_continuous(limits=c(min(latitude),max(latitude)))+labs(x="Longtitude",y="Latitude",title="Heat Map of Prices", subtitle="Per Square Foot, Kings County")
+
+map.price3<-map.price2+ guides(color=guide_legend(title="Price Per Square Foot"))
+map.price4<-map.price3+annotate("text", x = -122.3308333, y = 47.6063889, label = "Seattle", size=8)+annotate("text", x = -122.3405, y = 47.4668, label = "Burien", size=6)
+
+print(map.price4)
+```
+
+As we can see, the prices near waterfront are higher so we people are paying a premium for a waterfront view.
+###Density plors
+```{r}
+ggplot(house_plot, aes(x=price_in_mil))+ geom_density(aes(group=floors,colour=floors,fill=floors),alpha=.3)+labs(ggtitle("Density Plot of Price by Height"))+scale_x_continuous(name="Price in Millions")
+
+ggplot(house_plot, aes(x=price_sqft))+ geom_density(aes(group=floors,colour=floors,fill=floors),alpha=.3)+labs(ggtitle("Density Plot of Price per Sq. Ft. by Height"))+scale_x_continuous(name="Price by Square Foot")
+```
+
+
 #Creating an initial model for the dataset, using all the variables.
 ```{r}
 house_model<-lm(house$price~.,data=house)
