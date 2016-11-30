@@ -51,6 +51,29 @@ corrplot(housecor, method = "number")
 
 The correlation plot helps us to understand which variables in the data set are correlated to the response variable that we are considering, i.e - price. 
 
+```{r}
+
+gg1<-ggplot(house, aes(house$bedrooms,house$price))+geom_point()+geom_smooth()
+gg2<-ggplot(house, aes(house$bathrooms,house$price))+geom_point()+geom_smooth()
+gg3<-ggplot(house, aes(house$sqft_living,house$price))+geom_point()+geom_smooth()
+gg4<-ggplot(house, aes(house$sqft_lot,house$price))+geom_point()+geom_smooth()
+gg5<-ggplot(house, aes(house$floors,house$price))+geom_point()+geom_smooth()
+gg6<-ggplot(house, aes(house$waterfront,house$price))+geom_point()+geom_smooth()
+gg7<-ggplot(house, aes(house$view,house$price))+geom_point()+geom_smooth()
+gg8<-ggplot(house, aes(house$condition,house$price))+geom_point()+geom_smooth()
+gg9<-ggplot(house, aes(house$grade,house$price))+geom_point()+geom_smooth()
+gg10<-ggplot(house, aes(house$sqft_above,house$price))+geom_point()+geom_smooth()
+gg11<-ggplot(house, aes(house$sqft_basement,house$price))+geom_point()+geom_smooth()
+gg12<-ggplot(house, aes(house$yr_built,house$price))+geom_point()+geom_smooth()
+gg13<-ggplot(house, aes(house$yr_renovated,house$price))+geom_point()+geom_smooth()
+gg14<-ggplot(house, aes(house$zipcode,house$price))+geom_point()+geom_smooth()
+gg15<-ggplot(house, aes(house$sqft_living15,house$price))+geom_point()+geom_smooth()
+gg16<-ggplot(house, aes(house$sqft_lot15,house$price))+geom_point()+geom_smooth()
+grid.arrange(gg1,gg2,gg3,gg4,gg5,gg6,gg7,gg8,gg9,gg10,gg11,gg12,gg13,gg14,gg15,gg16,ncol=4,nrow=4)
+```
+
+We are visualizing the covariates with the response variables using ggplots.
+
 ##Generate heatmap
 ```{r echo=FALSE}
 hspricing <- read.csv("kc_house_data.csv", header = TRUE)
@@ -190,7 +213,7 @@ plot(house_modi6)
 
 After using the boxcox function and plotting for the model, we can see that even though we do apply the power transformation, where in we are raising the response variable by a power of 1.3, there is no difference in the model that we have chosen, as a result we can go ahead and consider the model with the 3 covariates 'BedBath', 'sqft_living' and 'Renov_Index', which actually consists of 5 different variables, since bedbath and renov_index are single variables which have been combined using 4 separate variables from the given dataset.
 
-Now we will try to see how price by sqft_living changes with zipcode so taking interaction variable
+##Now we will try to see how price by sqft_living changes with zipcode so taking interaction variable
 
 ```{r}
 house_modi_test<-lm(log10(price) ~ bedbath + sqft_living + zipcode++zipcode:sqft_living, data=house_modi)
@@ -235,4 +258,3 @@ head(confint(house_modi4,level=0.95))
 The confidence interval states that there is a 95% chance that the slope lies between the range given in the 2.5% - 97.5% values shown in the graph above.
 
 The above plots show that the error term(residual) has a normal distribution.
-
