@@ -59,9 +59,6 @@ price_per_sqft_living_lat_long_map <- gmap(lat = mean(hspricing$lat), lng = mean
 price_per_sqft_living_lat_long_map
 ```
 
-After generating the heat map, we can see through the zip codes, the areas in which the prices are high and the areas where the prices are low.
-
-
 #Creating an initial model for the dataset, using all the variables.
 ```{r}
 house_model<-lm(house$price~.,data=house)
@@ -182,6 +179,7 @@ Now we will try to see how price by sqft_living changes with zipcode so taking i
 house_modi_test<-lm(log10(price) ~ bedbath + sqft_living + zipcode++zipcode:sqft_living, data=house_modi)
 anova(house_modi4,house_modi_test)
 summary(house_modi_test)$adj.r.squared
+vif(house_modi_test)
 ```
 
 As we can see the r squared has not changed much after adding interaction variable so we decide to keep our model as is.
