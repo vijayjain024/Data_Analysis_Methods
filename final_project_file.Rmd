@@ -22,6 +22,9 @@ require("car")
 ```
 
 ##Load the dataset
+
+We have loaded the dataset in the R memory.
+
 ```{r house}
 house<- read.csv("kc_house_data.csv")
 names(house)
@@ -29,6 +32,9 @@ names(house)
 ```
 
 ##Data Exploration
+
+Here we are looking at the variables present in the dataset and what they mean.
+
 ```{r}
 #summary(house)
 str(house)
@@ -59,6 +65,7 @@ price_per_sqft_living_lat_long_map <- gmap(lat = mean(hspricing$lat), lng = mean
 price_per_sqft_living_lat_long_map
 ```
 
+
 After generating the heat map, we can see through the zip codes, the areas in which the prices are high and the areas where the prices are low.
 
 
@@ -72,6 +79,7 @@ We can see that the model has a very small value for R2, suggesting that there a
 
 
 ##We can alter the variables to convert them to catergorical types as follows
+
 ##Changing datatypes for categorical variables
 ```{r}
 house$waterfront <- as.factor(house$waterfront)
@@ -84,6 +92,9 @@ house$zipcode <- as.factor(house$zipcode)
 
 
 ##Modifying the the dataset
+
+Modifying the dataset by taking a subset of the dataset.
+
 ```{r}
 house_modi=house[c(3:21)]
 house_modi$bedbath <- house_modi$bathrooms/house_modi$bedrooms
@@ -94,6 +105,9 @@ names(house_modi)
 ```
 
 #Linear model
+
+We are creating an initial linear model for the given dataset.
+
 ```{r}
 house_sub <- house[,c(3:17,20,21)]
 names(house_sub)
@@ -187,6 +201,8 @@ In the first graph we can see that the red line is not strongly curved line so t
 The second plot checks if residual has a normal distribution.
 The third plot is to check if variance is constant( that is to see if the standard deviation among the residuals appears to be constant). Here the variance looks about constant.
 
+Looking at the residual plots, we can infer that there is no non linear relationship and hence there is no need to go for polynomial regression but rather we can stick with the linear regression itself.
+
 ##Checking multicollinearity among the regressor variables
 ```{r}
 vif(house_modi4)
@@ -200,6 +216,13 @@ par(mfrow=c(2,1))
 hist(house_modi4$residuals)
 qqnorm(house_modi4$residuals)
 ```
+
+```{r}
+head(confint(house_modi4,level=0.95))
+
+```
+
+The confidence interval states that there is a 95% chance that the slope lies between the range given in the 2.5% - 97.5% values shown in the graph above.
 
 The above plots show that the error term(residual) has a normal distribution.
 
